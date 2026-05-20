@@ -96,7 +96,7 @@ export default function App() {
   };
 
     
-  const StormAlert = () => {
+    const StormAlert = () => {
     const slideAnim = useRef(new Animated.Value(-150)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -117,9 +117,10 @@ export default function App() {
           }),
         ]).start();
 
+        // NINCS TIMER, ÚGYHOGY NEM KELL CLEARTIMEOUT
+        // return () => clearTimeout(timer); - EZT TÖRÖLD!
         
-
-        return () => clearTimeout(timer);
+        return; // Csak ennyi kell
       } else {
         slideAnim.setValue(-150);
         fadeAnim.setValue(0);
@@ -144,7 +145,7 @@ export default function App() {
           style={styles.stormAlertContent}
         >
           <View style={styles.stormAlertIconContainer}>
-            <Ionicons name="thunderstorm" size={28} color="#0000F" />
+            <Ionicons name="thunderstorm" size={28} color="#FFCC00" />
           </View>
           <View style={styles.stormAlertTextContainer}>
             <Text style={styles.stormAlertTitle}>⚠️ VIHAR KÖZELEG!</Text>

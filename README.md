@@ -1,0 +1,1293 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList, ImageBackground, Animated, Image, Modal } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+
+import coverImg from './assets/bassfest.jpg';
+
+const FESTIVAL_DATA = {
+  name: "BASS FEST",
+  startDate: new Date("2026-07-09T20:00:00"),
+  program: [
+    { id: "j9_b1", date: "Július 9", artist: "Carv", start: "20:00", end: "21:30", stage: "BLACKOUT (Main Stage)", image: require('./Artists/carv.webp'), bio: "CARV a modern hard techno szcéna egyik leggyorsabban feltörekvő producere. Zenéjét a sötét, indusztriális atmoszféra és a fémesen kongó, nehéz ütemek határozzák meg. Nem finomkodik: szettjei az első perctől kezdve magas fordulatszámon pörögnek, tökéletes átmenetet képezve a klasszikus schranz és a mai, modern industrial hangzás között. Ideális fellépő ahhoz, hogy korán komoly fizikai munkára fogja a táncteret." },
+    { id: "j9_b2", date: "Július 9", artist: "KARAH", start: "21:30", end: "23:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/karah.jpg'), bio: "KARAH a sötét és a kifejezetten energikus rave-hangulat tökéletes egyensúlyát hozza el. Szettjeiben előszeretettel keveri a kora kétezres évek acid és trance elemeit a mai hard techno kőkemény tempójával. Képes egy olyan hipnotikus, érzelmes, mégis agresszív utazásra vinni a közönséget, ami után a hajnali órákban is mindenki extázisban ugrál. " },
+    { id: "j9_b3", date: "Július 9", artist: "Basswell", start: "23:00", end: "01:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/basswell.jpg'), bio: "A francia Basswell egy igazi energiabomba. Zenéiben és DJ-szettjeiben a 90-es évek underground rave kultúrája éled újjá, modern, bivalyerős hangzással megtámogatva. Játékára jellemzőek a váratlan ritmusváltások, a feszültség végletekig való fokozása, majd a mindent elsöprő, dübörgő dropok. Nála a nosztalgia és a modern brutalitás kéz a kézben jár."  },
+    { id: "j9_b4", date: "Július 9", artist: "Klangkuenstler", start: "01:00", end: "03:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/klangkuenstler.jpg'), bio: "Klangkuenstler ma a műfaj egyik abszolút királya és headlinere. A német DJ/producer szinte egymaga hozta vissza a köztudatba a 2000-es évek elejének kíméletlen, loop-orientált schranz és hard techno hangzását. Fellépései híresek arról, hogy nincsenek felesleges leállások, nincsenek lágy dallamok – csak a tiszta, nyers, indusztriális pusztítás a legmagasabb művészi szinten. A fesztiválok legfontosabb záró-szettjeinek felelőse. " },
+    { id: "j9_a1", date: "Július 9", artist: "Daniella da Silva", start: "20:00", end: "21:30", stage: "APEX Stage", image: require('./Artists/danielladasilva.jpg'), bio: "Daniella da Silva a klasszikus és a modern techno sötét metszéspontjait képviseli. Szettjeire jellemző a kíméletlen, de rendkívül elegáns ritmika: finoman adagolja a feszültséget, miközben a dübörgő kickek mellé analóg acid szintifutamokkal pakol. Kiváló érzékkel vezeti be a közönséget a mélyebb, sötétebb underground hangulatba, így tökéletes választás a fesztivál korai, de már komoly energiát követelő idősávjaiba.  " },
+    { id: "j9_a2", date: "Július 9", artist: "Hot X", start: "21:30", end: "23:00", stage: "APEX Stage", image: require('./Artists/hotx.jpg'), bio: "Hot X a magyar techno kultúra abszolút alapító atyja és élő legendája. Évtizedek óta a hazai underground legfontosabb motorja, akinek a neve egyet jelent a kompromisszummentes, minőségi elektronikus zenével. Szettjei igazi mesterkurzusok: a tempót nem a túlhúzott BPM-számmal, hanem a loopok hipnotikus vastagságával és a tökéletesen adagolt sötét energiákkal tartja a csúcson. Bármelyik színpadon lép fel, jelenléte tiszteletparancsoló, szelekciója pedig megkerülhetetlen." },
+    { id: "j9_a3", date: "Július 9", artist: "Amelie Lens", start: "23:00", end: "01:00", stage: "APEX Stage", image: require('./Artists/amelielens.webp'), bio: "Amelie Lens a globális techno kultúra egyik legnagyobb szupersztárja and stadionokat megtöltő headlinere. Szettjei a tiszta, szűretlen energiáról szólnak: imádja a gyors, pattogós dobgépek, a hipnotikus vokálok és a szirénázó acid hullámok. Nem hagy időt a pihenésre; nála a kiállások is csak arra szolgálnak, hogy a következő drop még nagyobbat üssön.  " },
+    { id: "j9_a4", date: "Július 9", artist: "Ben Klock", start: "01:00", end: "03:00", stage: "APEX Stage", image: require('./Artists/benklock.jpg'), bio: "Ben Klock a modern techno alfája és ómegája, Berlin és a legendás Berghain klub zenei arca. Az ő művészete nem a sebességről szól, hanem a mélységről és a textúrákról. Szettjei nyers, funkcionális és nehéz indusztriális ütemekből építkeznek, amelyek szinte észrevétlenül szippantják be a hallgatót egy olyan transzszerű állapotba, ahol megszűnik az időérzék. Ideális választás egy maratoni, mély és sötét záráshoz, ahol a zene teljesen átveszi az irányítást a test felett. " },
+    { id: "j9_e1", date: "Július 9", artist: "Marie Vaunt", start: "20:00", end: "21:30", stage: "ECLIPSE Arena", image: require('./Artists/marievaunt.jpg'), bio: "Marie Vaunt a sötét, atmoszférikus és dallamos techno egyik legalgalkalmasabb alakja. Zenéiben mesterien keveri a gótikus, filmzenés hangulatot a kíméletlen, modern techno lüktetésével. Nem a tiszta sebességre, hanem a feszültségre és a sűrű, sötét energiákra épít. Szettjei tökéletesek ahhoz, hogy a közönséget egy misztikus, hipnotikus utazásra vigye a késő esti órákban, mielőtt a fesztivál átvált a legdurvább tempóra. " },
+    { id: "j9_e2", date: "Július 9", artist: "Cloudy", start: "21:30", end: "23:00", stage: "ECLIPSE Arena", image: require('./Artists/cloudy.jpg'), bio: "Cloudy a modern hard techno generáció egyik legfényesebb csillaga. Zenéje és szettjei a tiszta extázisról és a szabadságról szólnak: a kíméletlen indusztriális és schranz ütemek nála keverednek a 90-es évek dance-remixeivel és fülbemászó pop-vokáljaival. Bár a tempó kőkemény, a hangulat nála sosem nyomasztó – Cloudy szettjei alatt az egész tánctér egyszerre ugrik, mosolyog és tombol. " },
+    { id: "j9_e3", date: "Július 9", artist: "999999999", start: "23:00", end: "01:00", stage: "ECLIPSE Arena", image: require('./Artists/999999999.jpg'), bio: "Az olasz duó, a 999999999  a hard techno szcéna egyik legfontosabb és legnépszerűbb headlinere. Fellépéseik igazi hardveres Live Act-ek: a pulton lévő analóg gépeiket teljesen élőben manipulálják, folyamatosan improvizálva és hergelve a tömeget. Szettjeik híresek a megállás nélküli, száguldó tempóról és azokról a sikító, torzított sav-menetekről, amik azonnal kollektív önkívületi állapotba sodorják a nagyszínpad közönségét. " },
+    { id: "j9_e4", date: "Július 9", artist: "Timmy Trumpet", start: "01:00", end: "03:00", stage: "ECLIPSE Arena", image: require('./Artists/timmytrumpet.jpg'), bio: "Timmy Trumpet a világ egyik legnagyobb elektronikus zenei szupersztárja, aki a klasszikus techno fesztiválok legfőbb kakukktojása és egyben legnagyobb showmanje. Ő nem az underground sötétséget hozza el, hanem a tiszta, nagyszínpados vizuális és zenei robbanást. Szettjeiben a hardstyle, a psy-trance és a legpörgősebb hard-dance elemek váltják egymást őrült tempóban, miközben folyamatosan kommunikál a tömeggel és élőben trombitál. Tökéletes választás a fesztivál csúcspontjára, ahol a látvány és a kollektív megőrülés a cél. " },
+    { id: "j9_p1", date: "Július 9", artist: "KAYZO", start: "20:00", end: "21:30", stage: "PSYCHO Stage", image: require('./Artists/kayzoo.jpg'), bio: "Kayzo a műfajok közötti határok teljes eltörlésének nagymestere, a Welcome Records feje. Ő az elektronikus zene igazi rocksztárja: szettjeiben a heavy metál nyers, zúzós energiája keveredik a legdurvább dubstep és hard dance ütemekkel. Fellépései kiszámíthatatlan, fejrázós moshpit-őrületet generálnak, ami tökéletes jégtörő ahhoz, hogy a színpad falait már a korai órákban alapjaiban rengesse meg. " },
+    { id: "j9_p2", date: "Július 9", artist: "Riot Shift", start: "21:30", end: "23:00", stage: "PSYCHO Stage", image: require('./Artists/riotshift.jpg'), bio: "A Riot Shift egy egyedülálló német rawstyle duó, akik szó szerint bevitték a metalcore és a punk-rock kultúrát a rave-szzcénába. Fellépéseik során a srácok sokszor maguk éneklik/ordítják a számok vokáljait a pult mögött, miközben olyan torzított, gépfegyver-szerű industrial és rawstyle kickekkel bombázzák a közönséget, amitől azonnal pogó alakul ki a tánctéren. A legdurvább, legnyersebb rock-rave élmény megtestesítői. " },
+    { id: "j9_p3", date: "Július 9", artist: "Aversion", start: "23:00", end: "01:00", stage: "PSYCHO Stage", image: require('./Artists/aversion.jpg'), bio: "Aversion a modern rawstyle szcéna egyik legnagyobb zsenije és közönségkedvence. Zenéjének titka a tökéletes egyensúly: képes monumentális, libabőrös fesztivál-dallamokat írni, amiket aztán olyan modern, csattanós és innovatív kickekkel tör szét, hogy a tömeg egyszerre énekel és tombol. Szettjei rendkívül dinamikusak, pörgősek, és garantáltan a fesztivál egyik legslágeresebb, legenergetikusabb idősávját hozzák el." },
+    { id: "j9_p4", date: "Július 9", artist: "Sub Zero Project", start: "01:00", end: "03:00", stage: "PSYCHO Stage", image: require('./Artists/subzeroproject.jpeg'), bio: "A holland duó, a Sub Zero Project a hard-dance kultúra abszolút úttörője és aréna-headlinere. Ők voltak azok, akik forradalmasították a rawstyle műfaját a pszichedelikus elemek beemelésével. Fellépéseik nem szimpla DJ-szettek, hanem történetmesélős, futurisztikus audio-vizuális utazások. Hihetetlenül kreatív sound-design és stadionméretű hangzás jellemzi őket, amivel pillanatok alatt képesek katatón extázisba és megállás nélküli ugrálásba hajszolni a színpad előtt álló több ezer embert." },
+ 
+    { id: "j10_b1", date: "Július 10", artist: "Charlotte De Witte", start: "20:00", end: "21:30", stage: "BLACKOUT (Main Stage)", image: require('./Artists/charlottedewitte.jpg'), bio: "Charlotte de Witte a globális techno szcéna egyik legnagyobb és legmeghatározóbb alakja, a KNTXT kiadó alapítója. Szettjei híresek a precíz, fokozatos építkezésről és a hipnotikus atmoszféráról. Bár a tempója alacsonyabb, mint a kíméletlen schranz előadóké, a basszusok súlya és az acid szintetizátorok lüktetése olyan monumentális energiát teremt, ami pillanatok alatt képes hipnotizálni és megmozgatni egy több tízezres nagyszínpados tömeget is. " },
+    { id: "j10_b2", date: "Július 10", artist: "Technokool", start: "21:30", end: "23:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/technokool.jpg'), bio: "Technokool a magyar hard techno szcéna egyik legfontosabb és legmeghatározóbb hazai bázisa. Ismertsége és tehetsége révén tökéletes kapocs a nemzetközi headlinerek és a hazai underground kultúra között. Szettjeiben nem finomkodik: a nyers indusztriális hangzásfrom kezdve a gyors, zakatoló schranz ütemekig mindent bevet, hogy a táncteret az első perctől kezdve maximális fordulatszámra pörgesse. Ideális választás a fesztivál energiáinak megalapozásához vagy egy sötét bunker-színpad beizzításához. " },
+    { id: "j10_b3", date: "Július 10", artist: "Restricted", start: "23:00", end: "01:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/restricted.jpg'), bio: "Az ausztrál Restricted a modern rave-generáció egyik nagy kedvence. Fiatalos, rendkívül energikus fellépései arról híresek, hogy elmossák a határokat az underground techno és a populárisabb, fesztivál-centrikus hard dance között. Szettjei tele vannak váratlan mashupokkal, óriási kiállásokkal és pörgős dropokkal. Tökéletes átvezető előadó, aki képes a dallamosabb elektronikus zenéken szocializálódott tömeget is egy szempillantás alatt belevontatni a keményebb ütemek világába." },
+    { id: "j10_b4", date: "Július 10", artist: "Angerfist", start: "01:00", end: "03:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/angerfist.jpg'), bio: "Angerfist a hardcore zene élő legendája, a műfaj abszolút császára, aki évtizedek óta bérelt hellyel rendelkezik a világ legjobb DJ-i között. Az ő fellépése nem egy sima techno szett, hanem egy kíméletlen, agresszív és elsöprő erejű rituálé. A tempó nála nem áll meg 160-as hard technónál; szettjei során a BPM-szám folyamatosan kúszik fel a legdurvább uptempo tartományokba. Fellépése a fesztivál abszolút csúcspontja azok számára, akik a tiszta, határokat nem ismerő zenei pusztítást keresik." },
+    { id: "j10_a1", date: "Július 10", artist: "Jowi", start: "20:00", end: "21:30", stage: "APEX Stage", image: require('./Artists/jowi.jpg'), bio: "Jowi a feltörekvő hard techno generáció egyik legizgalmasabb és legnyersebb hangzású alakja. Zenéjére a kora kétezres évek indusztriális schranz ütemei és a modern, pattogós fesztivál-hard-techno fúziója jellemző. Szettjei híresek a megállás nélküli, feszes tempóról és a sötét, fojtogató energiákról. Tökéletes választás ahhoz, hogy a közönséget egyből bedobja a mélyvízbe és megalapozza az éjszakai darálást. " },
+    { id: "j10_a2", date: "Július 10", artist: "Charlie Sparks", start: "21:30", end: "23:00", stage: "APEX Stage", image: require('./Artists/charliesparks.jpg'), bio: "Charlie Sparks a modern hard techno szcéna egyik legkeresettebb és legdinamikusabb DJ-je. Fellépései igazi energiabombák: szettjeiben mesterien mossa össze a sötét indusztriális techno nyers erejét a hipnotikus acid hullámokkal és a pszichedelikus (psy) elemekkel. Imádja a drámai kiállásokat és a mindent elsöprő dropokat, amivel garantáltan a tetőfokára emeli a hangulatot a nagyszínpadon vagy egy sötét bunkerben. " },
+    { id: "j10_a3", date: "Július 10", artist: "Alignment", start: "23:00", end: "01:00", stage: "APEX Stage", image: require('./Artists/alignment.jpg'), bio: "Alignment a KNTXT és a Voxnox kiadók egyik legmeghatározóbb arca. Zenéje a tökéletes kapocs a dallamos, nosztalgikus neo-rave és a kíméletlen hard techno között. Szettjei tele vannak érzelemmel, száguldó szintetizátorfutamokkal és óriási energiákkal, amelyek úgy repítik vissza a közönséget az illegális raktárbulik fénykorába, hogy közben a legmodernebb sound-design szakítja le a fejeket." },
+    { id: "j10_a4", date: "Július 10", artist: "6EJOU", start: "01:00", end: "03:00", stage: "APEX Stage", image: require('./Artists/6ejou.jpg'), bio: "6EJOU jelenleg a hard techno szcéna egyik legkülönlegesebb és legtiszteltebb művésze. Ő nem hagyományos DJ: fellépései során nem pendrive-ról playszik, hanem a pultot teljesen megtöltő analóg gépein, szintetizátorain és szekvencerein a szemünk előtt, teljesen élőben gyúrja össze a legbrutálisabb ütemeket. Szettjei kiszámíthatatlanok, kíméletlenül gyorsak és olyan indusztriálisak, mintha egy működő fémkohó közepén táncolnál. Fellépése a fesztivál abszolút szakmai és energetikai csúcspontja. ." },
+    { id: "j10_e1", date: "Július 10", artist: "DJ Bountyhunter", start: "20:00", end: "21:30", stage: "ECLIPSE Arena", image: require('./Artists/djbountyhunter.jpg'), bio: "DJ Bountyhunter a kemény elektronikus zene igazi úttörője és élő történeleme. A legendás belga Bonzai Records egyik alaposzlopaként már akkor több tízezres rave-eken játszott, amikor a hard techno mai sztárjai még meg sem születtek. Szettjei nosztalgikus időutazások, ahol a korai hardcore és a sötét, dübörgő korai hard trance elemei dominálnak. Fellépése a fesztivál igazi ínyencsége, ami előtt a fiatalabb és az old-school generáció tagjai is fejet hajtanak. " },
+    { id: "j10_e2", date: "Július 10", artist: "Anxhela", start: "21:30", end: "23:00", stage: "ECLIPSE Arena", image: require('./Artists/anxhela.jpg'), bio: "Anxhela a modern hard techno szcéna egyik legstabilabb és legnyersebb producere. Szettjeire jellemző a kíméletlen, fémes lüktetés, amit mesterien fűszerez hipnotikus acid dallamokkal és sötét, gótikus vokálokkal. Nem használ olcsó trükköket vagy pop-remixeket: nála a zene a tiszta underground energiáról és a megállás nélküli fizikai darálásról szól, ami tökéletesen működik egy sötét, füstös bunker színpadon. " },
+    { id: "j10_e3", date: "Július 10", artist: "Oguz", start: "23:00", end: "01:00", stage: "ECLIPSE Arena", image: require('./Artists/oguz.jpg'), bio: "Oguz jelenleg a globális hard techno szcéna egyik legfelkapottabb és legbefolyásosabb szupersztárja, az 808 ASYLUM feje. Szettjei a tiszta, modern rave-extázisról szólnak: a leggyorsabb schranz loopokat olyan pörgős hardstyle és industrial elemekkel vegyíti, amelyek egy másodperc pihenőt sem hagynak. Hihetetlen színpadi karizmájával és masszív slágereivel pillanatok alatt képes felrobbantani a fesztivál legnagyobb színpadát is. " },
+    { id: "j10_e4", date: "Július 10", artist: "I Hate Models", start: "01:00", end: "03:00", stage: "ECLIPSE Arena", image: require('./Artists/ihatemodels.jpg'), bio: "Hate Models a modern elektronikus zene egyik legrejtélyesebb és legzseniálisabb figurája. Ő nem szimplán DJ, hanem egy érzelmi hullámvasút irányítója: szettjeiben a legbrutálisabb, legnyersebb indusztriális büntetés és a leggyorsabb schranz másodpercek alatt csap át eufórikus, könnyfakasztó 90-es évekbeli trance dallamokba vagy épp cyber-punk electroba. Fellépései híresek a teljes kiszámíthatatlanságról és a pult mögötti transzszerű tombolásáról. Ő a fesztivál abszolút headlinere, akinek a záró szettje után a közönség garantáltan lélekben és fizikailag is teljesen megváltozva távozik. " },
+    { id: "j10_p1", date: "Július 10", artist: "Dr Donk", start: "20:00", end: "21:30", stage: "PSYCHO Stage", image: require('./Artists/drdonk.jpg'), bio: "Dr Donk a kemény elektronikus zene legőrültebb és legbulisabb oldalát képviseli. Szettjeiben a tiszta sebességet ötvözi a brit és európai bounce kultúrából ismert jellegzetes, gumilabda-szerűen pattogó donk hangzás. Nála a keménység nem sötét vagy nyomasztó; fellépései tele vannak energiával, humorral és olyan ritmusokkal, amikre képtelenség egy helyben állni. Tökéletes választás a színpad korai felrázásához vagy egy délutáni energialökethez." },
+    { id: "j10_p2", date: "Július 10", artist: "Dual Damage", start: "21:30", end: "23:00", stage: "PSYCHO Stage", image: require('./Artists/dualdamage.jpg'), bio: "A holland Dual Damage duó jelenleg a modern rawstyle szcéna legforróbb és leggyorsabban növekedő szenzációja. Ők azok, akik teljesen új alapokra helyezték a műfaj hangzását a fém- a fémhez csattanó, szinte szürreális sound-designnal ellátott kickjeikkel. Szettjeik alatt a közönség nem simán ugrik, hanem a trackek ritmusára, kollektíven imitálja a dropok töréseit. Fellépésük a fesztivál egyik legfelkapottabb és leglátványosabb megőrülése." },
+    { id: "j10_p3", date: "Július 10", artist: "Krowdexx", start: "23:00", end: "01:00", stage: "PSYCHO Stage", image: require('./Artists/krowdexx.jpg'), bio: "Az olasz származású Krowdexx testvérpár a tekintélyes Gearbox Digital kiadó abszolút éllovasa. Zenéjük a kíméletlen brutalitás és a precíz, modern technológia tökéletes házassága. Szettjeik híresek az elképesztő tempóról és a másodpercenként változó, torzított basszusvariációkról. Nem hagynak időt a pihenésre: a kiállások rövidek, a dropok pedig úgy csapnak le a tömegre, mint egy megállíthatatlan ipari úthenger. " },
+    { id: "j10_p4", date: "Július 10", artist: "Sickmode", start: "01:00", end: "03:00", stage: "PSYCHO Stage", image: require('./Artists/sickmode.jpg'), bio: "Sickmode a modern rawstyle szcéna egyik legnagyobb hatású forradalmára, az Aggressive Recordstársalapítója. Ő volt az, aki visszafeedbackelte a tiszta bulit és a játékosságot a sokszor túl komoly rawstyle-ba. Szettjei elképesztően energikusak, pörgősek, tele vannak váratlan ritmusváltásokkal és olyan fülbemászó, de kőkemény dropokkal, amik azonnal kollektív eufóriába és megállás nélküli ugrálásba hajszolják a táncteret. Fellépése a fesztivál abszolút csúcspontja. " },
+ 
+    { id: "j11_b1", date: "Július 11", artist: "JAURI", start: "20:00", end: "21:30", stage: "BLACKOUT (Main Stage)", image: require('./Artists/jauri.jpg'), bio: "Jauri a magyar hard techno szcéna egyik legfontosabb motorja, producerként és DJ-ként is az underground megkerülhetetlen alakja. Szettjeire jellemző a kíméletlen sötétség és az indusztriális hangzás, amit előszeretettel fűszerez lüktető acid elemekkel és pörgős groove-okkal. Tökéletesen érzi a hazai közönség ritmusát: szettjei strukturáltak, energikusak, és képesek egy korai idősávban is azonnal maximális hőfokra hevíteni a táncteret. " },
+    { id: "j11_b2", date: "Július 11", artist: "Novah", start: "21:30", end: "23:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/novah.webp'), bio: "A belga származású Novah a modern hard techno generáció egyik legizgalmasabb női előadója. Zenéje a sötét indusztriális ütemek és a kora kétezres évek rave-hangulatának tökéletes fúziója. Fellépései híresek a hihetetlenül magas energiaszintről és a precíz technikáról. Szettjeiben a kíméletlen, torzított kickek mellett gyakran megjelennek a hipnotikus, space-es szintetizátorfutamok is, ami miatt a közönség szinte transzba esve tombol a szettjei alatt. " },
+    { id: "j11_b3", date: "Július 11", artist: "POLTERGST", start: "23:00", end: "01:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/poltergst.jpg'), bio: "Poltergst egy igazi audio-vizuális jelenség a pultban. Zenéje és szettjei egy disztópikus, cyberpunk jövőbe repítik a hallgatót, ahol a hard techno nyers ereje keveredik a hardstyle-ra jellemző agresszív, szaggatott kick-struktúrákkal. Imádja a váratlan dropokat és a feszültséggel teli kiállásokat, amiket aztán egy puskacsattanás-szerű basszussal robbant rá a tömegre. Egy Poltergst-szett garantáltan fizikai kihívás elé állítja a legkitartóbb rave-eseket os. " },
+    { id: "j11_b4", date: "Július 11", artist: "Nico Moreno", start: "01:00", end: "03:00", stage: "BLACKOUT (Main Stage)", image: require('./Artists/nicomoreno.jpg'), bio: "A francia Nico Moreno a kortárs hard techno szcéna egyik legmeghatározóbb úttörője és headlinere, az Insolent Rave Records alapítója. Szettjei nem ismernek kegyelmet: a tiszta, nyers, kompromisszummentes indusztriális rombolásról szólnak. Nála nincsenek finom átvezetések vagy lágy dallamok; a tempó végig 160 BPM felett pörög, fémes, nehéz kickekkel bombázva a hangrendszert. Fellépései a fesztiválok legvadabb és legnépszerűbb idősávjait jelentik, ahol a tömeg egy emberként lélegzik és tombol a kíméletlen ütemekre. " },
+    { id: "j11_a1", date: "Július 11", artist: "Zeuz", start: "20:00", end: "21:30", stage: "APEX Stage", image: require('./Artists/zeuz.jpg'), bio: "Zeuz a modern hard techno szcéna egyik legstabilabb és legmegbízhatóbb producereként ismert. Zenéjét a nyers gépies ritmusok és a sötét, fojtogató földalatti hangulat jellemzi. Nem használ felesleges sallangokat: szettjei strukturáltak, kíméletlenek és a tiszta indusztriális energiára építenek. Tökéletes választás ahhoz, hogy a korai idősávokban kőkeményen megdolgoztassa a közönség lábát. " },
+    { id: "j11_a2", date: "Július 11", artist: "Sara Landry", start: "21:30", end: "23:00", stage: "APEX Stage", image: require('./Artists/saralandry.webp'), bio: "Sara Landry jelenleg a globális hard techno szcéna egyik legmeghatározóbb, ikonikus alakja, a HEKATE kiadó alapítója. Ő az a DJ, aki a legsötétebb underground darálást képes volt stadionméretű nagyszínpadokra emelni. Szettjei hírhedtek a megállás nélküli, elsöprő erejű tempóról, a masszív, gyomrot rázó basszusokról és a rituális, transzszerű hangulatról. Jelenléte a pult mögött tekintélyparancsoló, szettje pedig a fesztivál egyik legjobban várt, garantált extázisa." },
+    { id: "j11_a3", date: "Július 11", artist: "Winson", start: "23:00", end: "01:00", stage: "APEX Stage", image: require('./Artists/winson.webp'), bio: "Winson a modern hard techno azon ágát képviseli, amely a kíméletlen tempót ötvözi a tiszta buli-energiával és a retró rave-nosztalgiával. Szettjeire jellemző a dinamizmus és a játékosság: nála a sötét indusztriális kickek közé simán beférnek fülbemászó éneksávok és vidámabb szintifutamok is, amiket aztán egy pusztító drop tör szilánkokra. Tökéletes átvezető előadó, aki garantáltan mosolyt és őrült ugrálást hoz a tánctérre." },
+    { id: "j11_a4", date: "Július 11", artist: "Fantasm", start: "01:00", end: "03:00", stage: "APEX Stage", image: require('./Artists/fantasm.jpg'), bio: "A fiatal kora ellenére globális hírnévnek örvendő Fantasm a legnyersebb, legdurvább hard techno vonal képviselője. Zenéje nem ismer kompromisszumot vagy pihenést; szettjei egybefüggő, gépfegyver-szerű ritmussal bombázzák a hangrendszert. Az indusztriális gyári zajok, a torzított basszusok és a kora kétezres évek legvadabb schranz ütemeinek fúziója az, amivel Fantasm pillanatok alatt porrá égeti a színpadot. Szettje a hardcore rave-esek legfőbb zarándokhelye. " },
+    { id: "j11_e1", date: "Július 11", artist: "Uberrest", start: "20:00", end: "21:30", stage: "ECLIPSE Arena", image: require('./Artists/uberrest.jpg'), bio: "Uberrest a tiszta, sallangmentes hard techno és schranz elkötelezett híve. Zenéje és szettjei távol állnak a populáris fesztivál-remixektől; nála a hangsúly a ritmusok hipnotikus ismétlődésén és a nehéz, indusztriális atmoszférán van. Nagyon precízen építi fel a szettjeit, kiválóan adagolva a feszültséget. Tökéletes választás a fesztivál korai vagy átvezető sávjaiba, hogy a tánctér fokozatosan, de megállíthatatlanul elérje a forráspontot. " },
+    { id: "j11_e2", date: "Július 11", artist: "Zapravka", start: "21:30", end: "23:00", stage: "ECLIPSE Arena", image: require('./Artists/zapravka.jpeg'), bio: "Zapravka a modern hard techno szcéna egyik legkülönlegesebb és legszórakoztatóbb formációja. Az ő missziójuk az, hogy a kőkemény, 160 feletti BPM-et és az indusztriális energiákat összehozzák a tiszta, ugrálós bulihangulattal és a fülbemászó, sokszor ironikus dallamokkal. Szettjeik igazi energiabombák, amelyek teljesen mentesek a techno olykor túl komoly, sötét kötelezettségeitől. Garantáltan megénekeltetik és megugráltatják a színpad előtt lévő tömeget. " },
+    { id: "j11_e3", date: "Július 11", artist: "Raxeller", start: "23:00", end: "01:00", stage: "ECLIPSE Arena", image: require('./Artists/raxeller.jpg'), bio: "Raxeller a jelenlegi hard techno szcéna egyik legnyersebb és legfélelmetesebb producere. Zenéje nem ismer kegyelmet: szettjei olyan súlyosak, mintha egy elhagyatott gyáróriás gépei egyszerre indulnának be. Imádja a sötét, baljóslatú felvezetéseket, amiket aztán olyan brutális, mindent szétszaggató indusztriális dropokkal robbant rá a közönségre, hogy a hangrendszer falai is beleremegnek. A legsötétebb éjszakai órák abszolút uralkodója. " },
+    { id: "j11_e4", date: "Július 11", artist: "Holy Priest", start: "01:00", end: "03:00", stage: "ECLIPSE Arena", image: require('./Artists/holypriest.jpg'), bio: "Holy Priest neve tökéletesen tükrözi azt, amit a színpadon művel: szettjei olyanok, mint egy sötét, gépies, 160 BPM-es zenei rituálé, ahol a techno szinte vallássá válik. Zenéiben mesterien mossa össze a kora kétezres évek klasszikus schranz darálását a modern, csattogós hard techno elemekkel és a sikító acid futamokkal. Nem hagy időt a pihenésre vagy a felesleges leállásokra – nála a szett egy egybefüggő, száguldó rohamtempó, ami a fesztivál legkésőbbi, záró óráiban is képes kisajtolni az utolsó csepp energiát is a közönségből. " },
+    { id: "j11_p1", date: "Július 11", artist: "GPF", start: "20:00", end: "21:30", stage: "PSYCHO Stage", image: require('./Artists/gpf.jpg'), bio: "A GPF a hardcore szcéna leginkább megosztó, legőrültebb és egyben legszórakoztatóbb jelensége. Zenéjük teljesen szembemegy a hagyományos sound-design szabályaival: a basszusaik nem mélyek, hanem fülrepesztően magasak és élesek (innen a piep-kick elnevezés). Szettjeik a tiszta trash-hangulatról és az önfeledt buliról szólnak, ahol a legdurvább tempó keveredik a popslágerek paródiáival. Fellépésük egy zenei elmegyógyintézet, amit egyszer mindenkinek át kell élnie. " },
+    { id: "j11_p2", date: "Július 11", artist: "Lil Texas", start: "21:30", end: "23:00", stage: "PSYCHO Stage", image: require('./Artists/liltexas.jpg'), bio: "Lil Texas az amerikai hardcore szcéna abszolút nagykövete és úttörője. Ő volt az, aki az Egyesült Államokban meghonosította és nagyszínpados szintre emelte az európai uptempo kultúrát. Szettjei nem ismernek kegyelmet: nála a warm-up is 200 BPM-nél kezdődik. A torzított, agresszív kickek és a hip-hop/trap elemek fúziója olyan elsöprő fizikai energiát szabadít fel a tánctéren, ami azonnal moshpitet és tömeges pogót generál. " },
+    { id: "j11_p3", date: "Július 11", artist: "TOZA", start: "23:00", end: "01:00", stage: "PSYCHO Stage", image: require('./Artists/toza.jpg'), bio: "Az Ausztráliából származó Toza a legújabb generációs hard-dance hullám egyik legizgalmasabb tehetsége. Zenéjére jellemző, hogy mesterien mossa össze a modern rawstyle legropogósabb elemeit az uptempo kíméletlen sebességével. Szettjei rendkívül dinamikusak, tele vannak kreatív drop-variációkkal és friss hangzásokkal. Tökéletes kapocs, aki képes a lassabb tempóról zökkenőmentesen átvezetni a közönséget a tiszta 200+ BPM-es őrületbe. " },
+    { id: "j11_p4", date: "Július 11", artist: "Dimitri K", start: "01:00", end: "03:00", stage: "PSYCHO Stage", image: require('./Artists/dimitrik.jpg'), bio: "A holland Dimitri K jelenleg az uptempo hardcore műfaj abszolút királya és legkeresettebb headlinere. Az ő fellépése a fesztivál végső, totális megsemmisítése. Szettjeiben nincsenek dallamok, nincsenek lágy kiállások – csak a tiszta, kíméletlen, gépfegyver-sebességű ritmikai terror. Rendkívül agresszív és dinamikus sound-design jellemzi, amivel a nap végén az utolsó csepp energiát is kisajtolja a közönségből. Aki az ő szettje után még lábon áll, az igazi túlélő. " }
+  ],
+  tickets: {
+    passes: [
+      { id: "t_student", name: "Diák Bérlet", price: "24.990 Ft", desc: "Érvényes a fesztivál mindhárom napjára. Belépéskor érvényes diákigazolvány felmutatása kötelező!" },
+      { id: "t_vip_pass", name: "VIP Bérlet", price: "59.990 Ft", desc: "3 napos teljes belépés + VIP terasz használat, külön mosdók, gyorsított beléptetés és elkülönített VIP bárok." }
+    ],
+    dayTickets: [
+      { id: "t_day1", name: "1. Napijegy (Július 9)", price: "12.990 Ft", desc: "Normál belépőjegy a fesztivál első napjára." },
+      { id: "t_day2", name: "2. Napijegy (Július 10)", price: "12.990 Ft", desc: "Normál belépőjegy a fesztivál második napjára." },
+      { id: "t_day3", name: "3. Napijegy (Július 11)", price: "12.990 Ft", desc: "Normál belépőjegy a fesztivál harmadik napjára." },
+      { id: "t_vip_day1", name: "1. VIP Napijegy (Július 9)", price: "24.990 Ft", desc: "VIP kiváltságok a fesztivál első napjára (gyors sor, VIP terasz)." },
+      { id: "t_vip_day2", name: "2. VIP Napijegy (Július 10)", price: "24.990 Ft", desc: "VIP kiváltságok a fesztivál második napjára (gyors sor, VIP terasz)." },
+      { id: "t_vip_day3", name: "3. VIP Napijegy (Július 11)", price: "24.990 Ft", desc: "VIP kiváltságok a fesztivál harmadik napjára (gyors sor, VIP terasz)." }
+    ]
+  }
+};
+
+const Tab = createBottomTabNavigator();
+
+export default function App() {
+  const [favorites, setFavorites] = useState([]);
+  const [selectedDate, setSelectedDate] = useState("Július 9");
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [stormWarning, setStormWarning] = useState(true); 
+  const [warningDismissed, setWarningDismissed] = useState(false);
+
+
+  const toggleFavorite = (id) => {
+    if (favorites.includes(id)) {
+      setFavorites(favorites.filter(favId => favId !== id));
+    } else {
+      setFavorites([...favorites, id]);
+    }
+  };
+
+    // VIHARJELZÉS KOMPONENS
+  const StormAlert = () => {
+    const blinkAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+      if (stormWarning && !warningDismissed) {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(blinkAnim, { toValue: 0.3, duration: 500, useNativeDriver: true }),
+            Animated.timing(blinkAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+          ])
+        ).start();
+      } else {
+        blinkAnim.setValue(1);
+      }
+      return () => blinkAnim.stopAnimation();
+    }, [stormWarning, warningDismissed]);
+
+    if (!stormWarning || warningDismissed) return null;
+
+    return (
+      <Animated.View style={[styles.stormAlertContainer, { opacity: blinkAnim }]}>
+        <View style={styles.stormAlertContent}>
+          <Ionicons name="thunderstorm" size={28} color="#FFCC00" />
+          <View style={styles.stormAlertTextContainer}>
+            <Text style={styles.stormAlertTitle}>⚠️ VIHAR KÖZELEG! ⚠️</Text>
+            <Text style={styles.stormAlertMessage}>
+              Várhatóan 15 percen belül heves zivatar érkezik! Kérjük, hagyd el a nyílt területeket, 
+              és keresd fel a legközelebbi fedett menedékhelyet (ECLIPSE Arena, beltéri bárok, mosdók)!
+            </Text>
+            <Text style={styles.stormAlertInstruction}>
+              👉 AZONNAL MENEDÉKET KELL KERESNI! 👈
+            </Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.stormAlertClose}
+            onPress={() => setWarningDismissed(true)}
+          >
+            <Ionicons name="close-circle" size={32} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    );
+  };
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.04, duration: 2500, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 2500, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  function DateTabs() {
+    const dates = ["Július 9", "Július 10", "Július 11"];
+    return (
+      <View style={styles.tabBarContainer}>
+        {dates.map((date) => {
+          const isActive = selectedDate === date;
+          return (
+            <TouchableOpacity
+              key={date}
+              style={[styles.tabButton, isActive && styles.tabButtonActive]}
+              onPress={() => setSelectedDate(date)}
+            >
+              <Text style={[styles.tabButtonText, isActive && styles.tabButtonTextActive]}>
+                {date.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    );
+  }
+
+  const renderProgramItem = ({ item }) => (
+    <TouchableOpacity style={styles.card} onPress={() => setSelectedArtist(item)} activeOpacity={0.8}>
+      <View style={styles.cardContent}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image 
+            source={item.image ? item.image : require('./Artists/carv.webp')} 
+            style={styles.artistSquareImage} 
+          />
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text style={styles.cardArtist}>{item.artist}</Text>
+              <View style={styles.timeTag}>
+                <Text style={styles.timeTagText}>{item.start} - {item.end}</Text>
+              </View>
+            </View>
+            <Text style={styles.cardStage}>{item.stage}</Text>
+          </View>
+        </View>
+      </View>
+      <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={styles.favoriteIconBox}>
+        <Ionicons name={favorites.includes(item.id) ? "heart" : "heart-outline"} size={26} color={favorites.includes(item.id) ? "#00FFCC" : "#fff"} />
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+
+  function HomeScreen({ navigation }) {
+    const [timeLeft, setTimeLeft] = useState("");
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const now = new Date();
+        const diff = FESTIVAL_DATA.startDate - now;
+        if (diff <= 0) {
+          setTimeLeft("A FESZTIVÁL ELKEZDŐDÖTT!");
+          clearInterval(interval);
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / 1000 / 60) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+        setTimeLeft(`${days} NAP ${hours}:${mins}:${secs}`);
+      }, 1000);
+      return () => clearInterval(interval);
+    }, []);
+
+    return (
+      <View style={styles.container}>
+        <Animated.View style={[styles.backgroundWrapper, { transform: [{ scale: pulseAnim }] }]}>
+          <ImageBackground source={coverImg} style={styles.backgroundImage} />
+        </Animated.View>
+
+        <View style={styles.overlay}>
+           <View style={styles.bottomSection}>
+              <Text style={styles.countdownLabel}>STARTIG HÁTRALEVŐ IDŐ:</Text>
+              <Text style={styles.countdownText}>{timeLeft}</Text>
+              
+              <TouchableOpacity
+                style={styles.exploreButton}
+                onPress={() => navigation.navigate('Program')}
+              >
+                <Text style={styles.exploreButtonText}>BELÉPÉS A FESZTIVÁLRA</Text>
+                <Ionicons name="arrow-forward" size={18} color="#000" />
+              </TouchableOpacity>
+           </View>
+        </View>
+      </View>
+    );
+  }
+
+  function ProgramScreen() {
+    const filteredProgram = FESTIVAL_DATA.program.filter(item => item.date === selectedDate);
+    return (
+      <View style={styles.container}>
+        <DateTabs />
+        <FlatList
+          data={filteredProgram}
+          keyExtractor={(item) => item.id}
+          renderItem={renderProgramItem}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      </View>
+    );
+  }
+
+  function FavoritesScreen() {
+    const favPrograms = FESTIVAL_DATA.program.filter(item => favorites.includes(item.id) && item.date === selectedDate);
+    return (
+      <View style={styles.container}>
+        <DateTabs />
+        {favPrograms.length === 0 ? (
+          <View style={styles.centeredView}>
+            <Ionicons name="heart-dislike-outline" size={64} color="#444" />
+            <Text style={styles.noFavText}>Nincs kedvencelt programod erre a napra.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={favPrograms}
+            keyExtractor={(item) => item.id}
+            renderItem={renderProgramItem}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
+      </View>
+    );
+  }
+
+
+
+  function ContactsScreen() {
+  const sponsors = [
+    {
+      id: "1",
+      name: "HEINEKEN",
+      image: require('./Logos/heineken.png'),
+      bg: '#0F2A1D',
+      border: '#1DB954'
+    },
+    {
+      id: "2",
+      name: "REDBULL",
+      image: require('./Logos/redbull.png'),
+      bg: '#111827',
+      border: '#2563EB'
+    },
+    {
+      id: "3",
+      name: "PIONEER DJ",
+      image: require('./Logos/pioneerdj.png'),
+      bg: '#181818',
+      border: '#666666'
+    },
+    {
+      id: "4",
+      name: "ALDI",
+      image: require('./Logos/aldi.png'),
+      bg: '#172554',
+      border: '#3B82F6'
+    },
+    {
+      id: "5",
+      name: "JÄGERMEISTER",
+      image: require('./Logos/jagermeister.png'),
+      bg: '#2A1A0F',
+      border: '#FF6B00'
+    },
+    {
+      id: "6",
+      name: "BURGER KING",
+      image: require('./Logos/burgerking.png'),
+      bg: '#2B160A',
+      border: '#F59E0B'
+    }
+  ];
+
+  return (
+    <View style={[styles.container, styles.centeredView]}>
+      <Ionicons name="call-outline" size={50} color="#00FFCC" />
+      <Text style={styles.menuTitle}>Szponzorok</Text>
+
+      <FlatList
+        data={sponsors}
+  keyExtractor={(item) => item.id}
+  numColumns={2}
+  contentContainerStyle={{ paddingTop: 20, paddingBottom: 20 }}
+  columnWrapperStyle={{
+    justifyContent: 'space-between',
+    paddingHorizontal: 15
+  }}
+        renderItem={({ item }) => (
+          <View style={{
+            backgroundColor: item.bg,
+            borderColor: item.border,
+            borderWidth: 1,
+            padding: 15,
+            marginVertical: 10,
+            borderRadius: 12,
+            width: '45%',
+            alignItems: 'center'
+          }}>
+            <Image
+              source={item.image}
+              style={{ width: 120, height: 60, resizeMode: 'contain' }}
+            />
+            <Text style={{ color: '#fff', marginTop: 10, fontWeight: 'bold' }}>
+              {item.name}
+            </Text>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
+  function MapScreen() {
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [showPaths, setShowPaths] = useState(true);
+
+  
+  const MAP_PLACES = [
+    { id: 1, title: 'BLACKOUT STAGE', type: 'STAGE', top: 50, left: 380, icon: 'musical-notes', color: '#FF007F', desc: 'Main Stage - A fesztivál szíve, ahol a legnagyobb hard techno nevek lépnek fel 160 BPM felett.' },
+    { id: 2, title: 'APEX STAGE', type: 'STAGE', top: 150, left: 80, icon: 'flash', color: '#FF9900', desc: 'Acid és Industrial zóna. Nyers ütemek és sötét analóg szintifutamok szabadtéren.' },
+    { id: 3, title: 'ECLIPSE ARENA', type: 'STAGE', top: 150, left: 680, icon: 'planet', color: '#00E5FF', desc: 'Hatalmas fedett aréna. Itt kapnak helyet a különleges Live Act produkciók és vizuális show-k.' },
+    { id: 4, title: 'PSYCHO STAGE', type: 'STAGE', top: 320, left: 580, icon: 'skull', color: '#E040FB', desc: 'Hardstyle, Rawstyle és Uptempo központ. Csak az igazán kemény arcoknak!' },
+    { id: 5, title: 'GASZTRÓ UDVAR', type: 'FOOD', top: 320, left: 160, icon: 'fast-food', color: '#00FFCC', desc: 'Bass Burger, Rave Pizza és Neon Noodle állomások. Itt töltheted fel az energiakészleteidet.' },
+    { id: 6, title: 'KÖZPONTI BÁR', type: 'BAR', top: 220, left: 415, icon: 'beer', color: '#FFCC00', desc: 'Hűtött italok, koktélok és frissítők a tánctér közvetlen közelében.' },
+    { id: 7, title: 'ELSŐSEGÉLY', type: 'MED', top: 120, left: 280, icon: 'medical', color: '#4CD964', desc: '24 órás orvosi ügyelet és segítségnyújtás. Vigyázzunk egymásra!' },
+    { id: 8, title: 'MOSDÓK (WC)', type: 'WC', top: 380, left: 380, icon: 'man', color: '#007AFF', desc: 'Konténeres mosdók és higiéniai állomás.' },
+    { id: 9, title: 'MERCH SHOP', type: 'SHOP', top: 60, left: 140, icon: 'shirt', color: '#FFCC00', desc: 'Hivatalos Bass Fest pólók, legyezők és kiegészítők.' }
+  ];
+
+  
+  const PATHS = [
+    { from: 1, to: 2, points: [{ x: 380, y: 50 }, { x: 300, y: 80 }, { x: 200, y: 100 }, { x: 80, y: 150 }] },
+    { from: 1, to: 3, points: [{ x: 380, y: 50 }, { x: 450, y: 80 }, { x: 550, y: 100 }, { x: 680, y: 150 }] },
+    { from: 1, to: 4, points: [{ x: 380, y: 50 }, { x: 420, y: 120 }, { x: 500, y: 200 }, { x: 580, y: 320 }] },
+    { from: 2, to: 5, points: [{ x: 80, y: 150 }, { x: 100, y: 220 }, { x: 130, y: 280 }, { x: 160, y: 320 }] },
+    { from: 3, to: 4, points: [{ x: 680, y: 150 }, { x: 650, y: 220 }, { x: 620, y: 280 }, { x: 580, y: 320 }] },
+    { from: 5, to: 6, points: [{ x: 160, y: 320 }, { x: 250, y: 300 }, { x: 350, y: 260 }, { x: 415, y: 220 }] },
+    { from: 6, to: 1, points: [{ x: 415, y: 220 }, { x: 400, y: 150 }, { x: 390, y: 100 }, { x: 380, y: 50 }] },
+    { from: 7, to: 1, points: [{ x: 280, y: 120 }, { x: 310, y: 90 }, { x: 350, y: 70 }, { x: 380, y: 50 }] },
+    { from: 8, to: 4, points: [{ x: 380, y: 380 }, { x: 450, y: 370 }, { x: 520, y: 350 }, { x: 580, y: 320 }] },
+    { from: 9, to: 2, points: [{ x: 140, y: 60 }, { x: 110, y: 90 }, { x: 95, y: 120 }, { x: 80, y: 150 }] },
+  ];
+
+  // Útvonal rajzolása
+  const renderPaths = () => {
+    return PATHS.map((path, idx) => (
+      <View key={`path-${idx}`} style={styles.pathsContainer}>
+        {path.points.map((point, pIdx) => {
+          if (pIdx === path.points.length - 1) return null;
+          const next = path.points[pIdx + 1];
+          // Vonal kiszámítása
+          const startX = point.x;
+          const startY = point.y;
+          const endX = next.x;
+          const endY = next.y;
+          const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+          const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+          
+          return (
+            <View
+              key={`segment-${idx}-${pIdx}`}
+              style={[
+                styles.pathLine,
+                {
+                  left: startX,
+                  top: startY,
+                  width: length,
+                  transform: [{ rotate: `${angle}deg` }],
+                },
+              ]}
+            />
+          );
+        })}
+      </View>
+    ));
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.mapTitle}> Fesztivál Térkép</Text>
+      
+      
+
+      {/* Görgethető térkép - optimalizált méretek telefonra */}
+      <ScrollView 
+        horizontal={true}
+        showsHorizontalScrollIndicator={true}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <ScrollView 
+          showsVerticalScrollIndicator={true}
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.mapWrapper}>
+            <View style={styles.mapBackground}>
+              
+              {/* Útvonalak */}
+              {showPaths && renderPaths()}
+              
+              {/* Segédrács */}
+              <View style={styles.gridLines}>
+                {[0, 100, 200, 300, 400, 500, 600, 700, 800].map((x) => (
+                  <View key={`v-${x}`} style={[styles.gridLine, { left: x, width: 1, height: '100%' }]} />
+                ))}
+                {[0, 50, 150, 250, 350, 450].map((y) => (
+                  <View key={`h-${y}`} style={[styles.gridLine, { top: y, height: 1, width: '100%' }]} />
+                ))}
+              </View>
+              
+              {/* Zónák feliratai */}
+              <Text style={[styles.zoneLabel, { top: 15, left: 340 }]}>🔥 MAIN</Text>
+              <Text style={[styles.zoneLabel, { top: 115, left: 20 }]}>⚡ APEX</Text>
+              <Text style={[styles.zoneLabel, { top: 115, left: 640 }]}>🌙 ECLIPSE</Text>
+              <Text style={[styles.zoneLabel, { top: 285, left: 530 }]}>🌀 PSYCHO</Text>
+              <Text style={[styles.zoneLabel, { top: 285, left: 100 }]}>🍔 GASZTRÓ</Text>
+              
+              {/* Pontok a térképen (név nélkül, csak ikon) */}
+              {MAP_PLACES.map((place) => (
+                <TouchableOpacity
+                  key={place.id}
+                  style={[styles.mapPin, { top: place.top - 16, left: place.left - 16 }]}
+                  onPress={() => setSelectedPlace(place)}
+                  activeOpacity={0.8}
+                >
+                  <View style={[styles.pinCircle, { backgroundColor: place.color, borderColor: place.color }]}>
+                    <Ionicons name={place.icon} size={18} color="#fff" />
+                  </View>
+                </TouchableOpacity>
+              ))}
+              
+              {/* Helyszín nevek a pontok mellett */}
+              {MAP_PLACES.map((place) => (
+                <TouchableOpacity
+                  key={`label-${place.id}`}
+                  style={[styles.pinNameLabel, { top: place.top - 16, left: place.left + 20 }]}
+                  onPress={() => setSelectedPlace(place)}
+                >
+                  <Text style={styles.pinNameText}>{place.title.split(' ')[0]}</Text>
+                </TouchableOpacity>
+              ))}
+              
+            </View>
+          </View>
+        </ScrollView>
+      </ScrollView>
+
+      {/* Jelmagyarázat - görgethető */}
+      <View style={styles.legendBox}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {MAP_PLACES.map((place) => (
+            <TouchableOpacity
+              key={`leg-${place.id}`}
+              style={styles.legendItem}
+              onPress={() => setSelectedPlace(place)}
+            >
+              <View style={[styles.legendDot, { backgroundColor: place.color }]} />
+              <Text style={styles.legendText}>{place.title.split(' ')[0]}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Részletes infó modal - nem csúszik össze */}
+      <Modal
+        visible={selectedPlace !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedPlace(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.infoModalContent}>
+            <View style={[styles.infoModalHeader, { borderBottomColor: selectedPlace?.color }]}>
+              <View style={[styles.infoModalIcon, { backgroundColor: selectedPlace?.color + '20' }]}>
+                <Ionicons name={selectedPlace?.icon} size={28} color={selectedPlace?.color} />
+              </View>
+              <Text style={styles.infoModalTitle}>{selectedPlace?.title}</Text>
+              <TouchableOpacity onPress={() => setSelectedPlace(null)} style={styles.modalCloseBtn}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.infoModalBody} showsVerticalScrollIndicator={true}>
+              <Text style={[styles.infoModalType, { color: selectedPlace?.color }]}>{selectedPlace?.type}</Text>
+              <Text style={styles.infoModalDesc}>{selectedPlace?.desc}</Text>
+              <TouchableOpacity 
+                style={[styles.infoModalButton, { backgroundColor: selectedPlace?.color }]}
+                onPress={() => setSelectedPlace(null)}
+              >
+                <Text style={styles.infoModalButtonText}>Bezárás</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+  function InfoScreen() {
+    const foodStalls = [
+      { id: "1", name: "Bass Burger", desc: "Szaftos burgerek, ropogós krumpli és brutál szószok.", offer: "Dupla techno burger menü" },
+      { id: "2", name: "Rave Pizza", desc: "Gyors pizzaszeletek hajnalig, klasszikus és csípős feltétekkel.", offer: "Pepperoni bass slice" },
+      { id: "3", name: "Neon Noodle", desc: "Ázsiai tészták, wok ételek és extra csípős szószok.", offer: "Chili rave noodles" },
+      { id: "4", name: "Hardcore Hotdog", desc: "Felturbózott hotdogok hagymával, sajttal és erős szósszal.", offer: "Inferno hotdog" },
+      { id: "5", name: "Afterparty Lángos", desc: "Friss lángos tejföllel, sajttal vagy extra feltétekkel.", offer: "Sajtos-tejfölös mega lángos" }
+    ];
+
+    return (
+      <View style={styles.container}>
+        <ScrollView>
+          <Text style={styles.menuTitle}>Gasztró / Infó</Text>
+          {foodStalls.map((item) => (
+            <View key={item.id} style={styles.card}>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardArtist}>{item.name}</Text>
+                <Text style={styles.cardStage}>{item.desc}</Text>
+                <Text style={[styles.cardBio, { color: '#00FFCC', marginTop: 8, fontSize: 13 }]}>Ajánlat: {item.offer}</Text>
+              </View>
+            </View>
+          ))}
+          <View style={{ height: 30 }} />
+        </ScrollView>
+      </View>
+    );
+  }
+
+  function TicketsScreen() {
+    const renderTicketItem = (ticket) => (
+      <View key={ticket.id} style={styles.card}>
+        <View style={styles.cardContent}>
+          <View style={styles.ticketHeaderRow}>
+            <Text style={styles.ticketName}>{ticket.name}</Text>
+            <View style={styles.priceTag}>
+              <Text style={styles.priceTagText}>{ticket.price}</Text>
+            </View>
+          </View>
+          <Text style={styles.ticketDesc}>{ticket.desc}</Text>
+          <TouchableOpacity 
+            style={styles.buyButton} 
+            onPress={() => alert(`${ticket.name} kiválasztva! Drogozz sokat!`)}
+          >
+            <Text style={styles.buyButtonText}>MEGVÉTEL</Text>
+            <Ionicons name="cart-outline" size={16} color="#000" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+
+    return (
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+          <Text style={styles.menuTitle}>Bérletek</Text>
+          {FESTIVAL_DATA.tickets.passes.map(renderTicketItem)}
+          
+          <Text style={[styles.menuTitle, { marginTop: 15 }]}>Napijegyek</Text>
+          {FESTIVAL_DATA.tickets.dayTickets.map(renderTicketItem)}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <StormAlert />
+      <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ color, size }) => {
+            let iconNames = { 
+              'Kezdőlap': 'home', 
+              'Program': 'calendar', 
+              'Menetrend': 'heart', 
+              'Térkép': 'map', 
+              'Gasztró/Infó': 'fast-food',
+              'Jegyek': 'ticket',
+              'Kapcsolatok': 'call-outline'
+            };
+            return <Ionicons name={iconNames[route.name]} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: '#00FFCC',
+          tabBarInactiveTintColor: '#666',
+          tabBarStyle: { backgroundColor: '#000', borderTopWidth: 0, height: 60, paddingBottom: 10 },
+          headerStyle: { backgroundColor: '#000', shadowColor: 'transparent', elevation: 0 },
+          headerTintColor: '#fff',
+        })}
+      >
+        <Tab.Screen name="Kezdőlap" component={HomeScreen} options={{ headerShown: false }} />
+        <Tab.Screen name="Program" component={ProgramScreen} />
+        <Tab.Screen name="Menetrend" component={FavoritesScreen} />
+        <Tab.Screen name="Jegyek" component={TicketsScreen} />
+        <Tab.Screen name="Térkép" component={MapScreen} />
+        <Tab.Screen name="Gasztró/Infó" component={InfoScreen} />
+        <Tab.Screen name="Kapcsolatok" component={ContactsScreen} />
+      </Tab.Navigator>
+
+      <Modal
+        visible={selectedArtist !== null}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSelectedArtist(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>ELŐADÓ ADATLAP</Text>
+              <TouchableOpacity onPress={() => setSelectedArtist(null)} style={styles.closeIcon}>
+                <Ionicons name="close-circle" size={30} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            {selectedArtist && (
+              <ScrollView contentContainerStyle={styles.modalScroll}>
+                <Image 
+                  source={selectedArtist.image ? selectedArtist.image : require('./Artists/carv.webp')} 
+                  style={styles.modalArtistImage} 
+                />
+                <Text style={styles.modalArtistName}>{selectedArtist.artist}</Text>
+                
+                <View style={styles.modalInfoRow}>
+                  <View style={styles.modalTag}>
+                    <Ionicons name="time-outline" size={14} color="#00FFCC" style={{ marginRight: 5 }} />
+                    <Text style={styles.modalTagText}>{selectedArtist.start} - {selectedArtist.end}</Text>
+                  </View>
+                  <View style={styles.modalTag}>
+                    <Ionicons name="location-outline" size={14} color="#00FFCC" style={{ marginRight: 5 }} />
+                    <Text style={styles.modalTagText}>{selectedArtist.stage}</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.modalBioTitle}>Bemutatkozás</Text>
+                <Text style={styles.modalBioText}>{selectedArtist.bio}</Text>
+
+                <TouchableOpacity style={styles.modalCloseButton} onPress={() => setSelectedArtist(null)}>
+                  <Text style={styles.modalCloseButtonText}>BEZÁRÁS</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </NavigationContainer>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#0a0a0a' },
+  backgroundWrapper: { ...StyleSheet.absoluteFillObject },
+  backgroundImage: { flex: 1, width: '100%', height: '100%', resizeMode: 'cover' },
+  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.2)' },
+  bottomSection: { padding: 30, alignItems: 'center', backgroundColor: 'rgba(10,10,10,0.85)', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingBottom: 40, borderTopWidth: 1, borderTopColor: '#222' },
+  countdownLabel: { color: '#00FFCC', fontSize: 11, fontWeight: 'bold', letterSpacing: 3 },
+  countdownText: { color: '#fff', fontSize: 28, fontWeight: 'bold', marginVertical: 12, letterSpacing: 1 },
+  exploreButton: { flexDirection: 'row', backgroundColor: '#00FFCC', paddingVertical: 15, paddingHorizontal: 32, borderRadius: 30, alignItems: 'center', marginTop: 8 },
+  exploreButtonText: { color: '#000', fontWeight: 'bold', marginRight: 8, fontSize: 13, letterSpacing: 1 },
+  centeredView: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  tabBarContainer: { flexDirection: 'row', backgroundColor: '#000', padding: 8, marginHorizontal: 15, marginTop: 15, borderRadius: 15, borderWidth: 1, borderColor: '#222' },
+  tabButton: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
+  tabButtonActive: { backgroundColor: '#161616', borderWidth: 1, borderColor: '#333' },
+  tabButtonText: { color: '#666', fontSize: 11, fontWeight: 'bold', letterSpacing: 1 },
+  tabButtonTextActive: { color: '#00FFCC' },
+  card: { flexDirection: 'row', backgroundColor: '#121212', marginHorizontal: 15, marginTop: 15, borderRadius: 12, overflow: 'hidden', alignItems: 'center', borderWidth: 1, borderColor: '#1f1f1f', padding: 4 },
+  cardContent: { padding: 16, flex: 1 },
+  cardArtist: { color: '#fff', fontSize: 20, fontWeight: 'bold', letterSpacing: 0.5 },
+  timeTag: { backgroundColor: '#1c1c1e', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6, borderWidth: 1, borderColor: '#2c2c2e' },
+  timeTagText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  cardStage: { color: '#00FFCC', fontSize: 12, marginTop: 4, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  cardBio: { color: '#8e8e93', fontSize: 13, marginTop: 10, lineHeight: 18 },
+  favoriteIconBox: { padding: 16 },
+  noFavText: { color: '#666', fontSize: 15, marginTop: 15, textAlign: 'center' },
+  menuTitle: { color: '#fff', fontSize: 24, fontWeight: 'bold', paddingHorizontal: 20, paddingTop: 20 },
+  mapGraphic: { width: '90%', backgroundColor: '#121212', padding: 22, borderRadius: 15, marginTop: 15, borderWidth: 1, borderColor: '#222' },
+  mapPin: { color: '#fff', fontSize: 15, marginVertical: 10, fontWeight: '500' },
+  artistSquareImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+    resizeMode: 'cover',
+    backgroundColor: '#222'
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#121212',
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    paddingTop: 20,
+    maxHeight: '85%',
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#222',
+  },
+  modalTitle: {
+    color: '#666',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  closeIcon: {
+    padding: 2,
+  },
+  modalScroll: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalArtistImage: {
+    width: 160,
+    height: 160,
+    borderRadius: 20,
+    resizeMode: 'cover',
+    marginBottom: 15,
+    borderWidth: 2,
+    borderColor: '#1f1f1f',
+  },
+  modalArtistName: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  modalInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '100%',
+    marginBottom: 25,
+  },
+  modalTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1c1c1e',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: '#2c2c2e',
+  },
+  modalTagText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  modalBioTitle: {
+    color: '#00FFCC',
+    fontSize: 14,
+    fontWeight: 'bold',
+    alignSelf: 'flex-start',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  modalBioText: {
+    color: '#aaa',
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'left',
+    width: '100%',
+    marginBottom: 30,
+  },
+  modalCloseButton: {
+    backgroundColor: '#00FFCC',
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalCloseButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+
+  
+  ticketHeaderRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    width: '100%',
+    marginBottom: 8
+  },
+  ticketName: { 
+    color: '#fff', 
+    fontSize: 18, 
+    fontWeight: 'bold',
+    flex: 1,
+    marginRight: 10
+  },
+  priceTag: { 
+    backgroundColor: '#1c1c1e', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 8, 
+    borderWidth: 1, 
+    borderColor: '#00FFCC' 
+  },
+  priceTagText: { 
+    color: '#00FFCC', 
+    fontSize: 14, 
+    fontWeight: 'bold' 
+  },
+  ticketDesc: { 
+    color: '#a4a4aa', 
+    fontSize: 13, 
+    lineHeight: 18,
+    marginBottom: 12
+  },
+  buyButton: { 
+    flexDirection: 'row', 
+    backgroundColor: '#00FFCC', 
+    paddingVertical: 10, 
+    paddingHorizontal: 20, 
+    borderRadius: 8, 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    alignSelf: 'flex-start'
+  },
+  buyButtonText: { 
+    color: '#000', 
+    fontWeight: 'bold', 
+    marginRight: 6, 
+    fontSize: 12,
+    letterSpacing: 0.5
+  },
+    // Térkép stílusok
+  mapContainer: {
+    margin: 15,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  mapBackground: {
+    width: 850,
+    height: 500,
+    backgroundColor: '#1a1a1a',
+    position: 'relative',
+  },
+  gridLines: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  gridLine: {
+    position: 'absolute',
+    backgroundColor: '#2a2a2a',
+  },
+  zoneLabel: {
+    position: 'absolute',
+    color: '#444',
+    fontSize: 12,
+    fontWeight: 'bold',
+    backgroundColor: '#0a0a0a',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    zIndex: 1,
+  },
+  mapPin: {
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  pinCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  pinLabel: {
+    position: 'absolute',
+    top: -28,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  pinLabelText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  legendBox: {
+    backgroundColor: '#121212',
+    margin: 15,
+    marginTop: 5,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
+  },
+  legendText: {
+    color: '#fff',
+    fontSize: 11,
+  },
+  // Info modal stílusok
+  infoModalContent: {
+    backgroundColor: '#121212',
+    marginHorizontal: 20,
+    marginVertical: 'auto',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  infoModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 18,
+    borderBottomWidth: 2,
+  },
+  infoModalIcon: {
+    width: 45,
+    height: 45,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  infoModalTitle: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  infoModalBody: {
+    padding: 18,
+  },
+  infoModalType: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  infoModalDesc: {
+    color: '#aaa',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  infoModalButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  infoModalButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+    // Térkép stílusok
+  mapTitle: {
+    color: '#00FFCC',
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  pathToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a1a1a',
+    marginHorizontal: 15,
+    marginVertical: 8,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  pathToggleText: {
+    color: '#00FFCC',
+    marginLeft: 8,
+    fontSize: 12,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  mapWrapper: {
+    margin: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  mapBackground: {
+    width: 850,
+    height: 500,
+    backgroundColor: '#1a1a1a',
+    position: 'relative',
+  },
+  gridLines: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  gridLine: {
+    position: 'absolute',
+    backgroundColor: '#2a2a2a',
+  },
+  zoneLabel: {
+    position: 'absolute',
+    color: '#555',
+    fontSize: 11,
+    fontWeight: 'bold',
+    backgroundColor: '#0a0a0a',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    zIndex: 1,
+  },
+  mapPin: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 3,
+  },
+  pinCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  pinNameLabel: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  pinNameText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  pathsContainer: {
+    position: 'absolute',
+    zIndex: 0,
+  },
+  pathLine: {
+    position: 'absolute',
+    height: 2,
+    backgroundColor: '#00FFCC33',
+    transformOrigin: 'left center',
+  },
+  legendBox: {
+    backgroundColor: '#121212',
+    margin: 12,
+    marginTop: 5,
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+    backgroundColor: '#1a1a1a',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 6,
+  },
+  legendText: {
+    color: '#fff',
+    fontSize: 10,
+  },
+  // Modal stílusok (telefonon nem csúszik össze)
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 15,
+  },
+  infoModalContent: {
+    backgroundColor: '#121212',
+    borderRadius: 20,
+    width: '90%',
+    maxHeight: '70%',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  infoModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 2,
+  },
+  infoModalIcon: {
+    width: 45,
+    height: 45,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  infoModalTitle: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalCloseBtn: {
+    padding: 5,
+  },
+  infoModalBody: {
+    padding: 16,
+    maxHeight: 400,
+  },
+  infoModalType: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  infoModalDesc: {
+    color: '#aaa',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  infoModalButton: {
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  infoModalButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+    // VIHARJELZÉS STÍLUSOK
+  stormAlertContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 9999,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingTop: 45,
+    paddingBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: '#FFCC00',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 10,
+  },
+  stormAlertContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#FF3B30',
+    borderRadius: 12,
+    marginHorizontal: 10,
+  },
+  stormAlertTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  stormAlertTitle: {
+    color: '#FFCC00',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  stormAlertMessage: {
+    color: '#fff',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  stormAlertInstruction: {
+    color: '#FFCC00',
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginTop: 6,
+  },
+  stormAlertClose: {
+    padding: 5,
+    marginLeft: 10,
+  },
+});

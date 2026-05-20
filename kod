@@ -352,41 +352,75 @@ export default function App() {
   ];
 
   return (
-    <View style={[styles.container, styles.centeredView]}>
-      <Ionicons name="call-outline" size={50} color="#00FFCC" />
-      <Text style={styles.menuTitle}>Szponzorok</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Hero szekció */}
+      <View style={styles.contactHero}>
+        <Text style={styles.contactMiniTitle}>BASS FEST 2026</Text>
+        <Text style={styles.contactBigTitle}>Információk & Kapcsolat</Text>
+        <Text style={styles.contactDesc}>
+          Minden fontos információ egy helyen. Elérhetőségek, fesztivál tudnivalók és támogatók.
+        </Text>
+      </View>
 
-      <FlatList
-        data={sponsors}
-  keyExtractor={(item) => item.id}
-  numColumns={2}
-  contentContainerStyle={{ paddingTop: 20, paddingBottom: 20 }}
-  columnWrapperStyle={{
-    justifyContent: 'space-between',
-    paddingHorizontal: 15
-  }}
-        renderItem={({ item }) => (
-          <View style={{
-            backgroundColor: item.bg,
-            borderColor: item.border,
-            borderWidth: 1,
-            padding: 15,
-            marginVertical: 10,
-            borderRadius: 12,
-            width: '45%',
-            alignItems: 'center'
-          }}>
-            <Image
-              source={item.image}
-              style={{ width: 120, height: 60, resizeMode: 'contain' }}
-            />
-            <Text style={{ color: '#fff', marginTop: 10, fontWeight: 'bold' }}>
-              {item.name}
-            </Text>
+      {/* Elérhetőségek kártya */}
+      <View style={styles.contactCard}>
+        <View style={styles.contactRow}>
+          <Ionicons name="location-outline" size={24} color="#00FFCC" />
+          <View style={styles.contactTextContainer}>
+            <Text style={styles.contactLabel}>HELYSZÍN</Text>
+            <Text style={styles.contactValue}>SkyWave Park, Zamárdi</Text>
           </View>
-        )}
-      />
-    </View>
+        </View>
+
+        <View style={styles.contactDivider} />
+
+        <View style={styles.contactRow}>
+          <Ionicons name="call-outline" size={24} color="#00FFCC" />
+          <View style={styles.contactTextContainer}>
+            <Text style={styles.contactLabel}>TELEFON</Text>
+            <Text style={styles.contactValue}>+36 30 555 1987</Text>
+          </View>
+        </View>
+
+        <View style={styles.contactDivider} />
+
+        <View style={styles.contactRow}>
+          <Ionicons name="mail-outline" size={24} color="#00FFCC" />
+          <View style={styles.contactTextContainer}>
+            <Text style={styles.contactLabel}>EMAIL</Text>
+            <Text style={styles.contactValue}>info@bassfest.hu</Text>
+          </View>
+        </View>
+
+        <View style={styles.contactDivider} />
+
+        <View style={styles.contactRow}>
+          <Ionicons name="globe-outline" size={24} color="#00FFCC" />
+          <View style={styles.contactTextContainer}>
+            <Text style={styles.contactLabel}>WEBOLDAL</Text>
+            <Text style={styles.contactValue}>www.bassfest.hu</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Szponzorok */}
+      <Text style={styles.sponsorTitle}>KIEMELT SZPONZOROK</Text>
+
+      <View style={styles.sponsorGrid}>
+        {sponsors.map((sponsor) => (
+          <View key={sponsor.id} style={styles.sponsorCardModern}>
+            <Image
+              source={sponsor.image}
+              style={styles.sponsorImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.sponsorName}>{sponsor.name}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
   );
 }
 
@@ -1312,5 +1346,103 @@ const styles = StyleSheet.create({
   stormAlertClose: {
     padding: 5,
     marginLeft: 8,
+  },
+    // Kapcsolatok screen stílusok
+  contactHero: {
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 20,
+    alignItems: 'center',
+  },
+  contactMiniTitle: {
+    color: '#00FFCC',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  contactBigTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  contactDesc: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  contactCard: {
+    backgroundColor: '#121212',
+    marginHorizontal: 15,
+    marginTop: 15,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#222',
+    padding: 20,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  contactTextContainer: {
+    marginLeft: 15,
+    flex: 1,
+  },
+  contactLabel: {
+    color: '#666',
+    fontSize: 11,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  contactValue: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  contactDivider: {
+    height: 1,
+    backgroundColor: '#222',
+    marginVertical: 10,
+  },
+  sponsorTitle: {
+    color: '#00FFCC',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    marginHorizontal: 20,
+    marginTop: 25,
+    marginBottom: 15,
+  },
+  sponsorGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+  },
+  sponsorCardModern: {
+    width: '48%',
+    backgroundColor: '#121212',
+    borderRadius: 12,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  sponsorImage: {
+    width: 100,
+    height: 50,
+    marginBottom: 10,
+  },
+  sponsorName: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
